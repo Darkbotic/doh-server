@@ -4,5 +4,5 @@
 Cargo.lock
 /target/
 /src/libdoh/target/
-
+.swival
 test.sh
