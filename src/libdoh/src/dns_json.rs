@@ -136,6 +136,7 @@ fn parse_name(packet: &[u8], mut offset: usize) -> Result<(String, usize), Error
     let mut name = String::new();
     let mut jumped = false;
     let mut jump_offset = 0;
+    let mut jumps = 0;
     let packet_len = packet.len();
 
     loop {
@@ -148,6 +149,8 @@ fn parse_name(packet: &[u8], mut offset: usize) -> Result<(String, usize), Error
             if !jumped {
                 jump_offset = offset + 2;
             }
+            jumps += 1;
+            ensure!(jumps <= packet_len, "Compression pointer cycle");
             offset = (((len & 0x3f) as usize) << 8) | (packet[offset + 1] as usize);
             jumped = true;
             continue;
