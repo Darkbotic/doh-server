@@ -114,7 +114,7 @@ pub fn add_ecs_to_packet(
         let rr_start = offset;
 
         // Check if this is the root domain (OPT record has name = 0)
-        if offset < packet_len && packet[offset] == 0 {
+        if offset + 11 <= packet_len && packet[offset] == 0 {
             let rtype = BigEndian::read_u16(&packet[offset + 1..offset + 3]);
             if rtype == dns::DNS_TYPE_OPT {
                 let rdlength_offset = offset + 9; // After name(1) + type(2) + class(2) + ttl(4)
