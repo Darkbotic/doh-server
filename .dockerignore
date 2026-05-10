@@ -1,0 +1,16 @@
+# Rust build artifacts
+target/
+
+# Git
+.git/
+.github/
+
+# Dev/test files
+*.pem
+*.md
+logo.png
+
+# Docker files themselves
+Dockerfile
+compose.yml
+.dockerignore
