@@ -142,12 +142,17 @@ impl hyper::service::Service<http::Request<Body>> for DoH {
 
 impl DoH {
     async fn serve_get(&self, req: Request<Body>) -> Result<Response<Body>, http::Error> {
-        match Self::parse_content_type(&req) {
+        let mut response = match Self::parse_content_type(&req) {
             Ok(DoHType::Standard) => self.serve_doh_get(req).await,
             Ok(DoHType::Oblivious) => self.serve_odoh_get(req).await,
             Ok(DoHType::Json) => self.serve_json_get(req).await,
             Err(response) => Ok(*response),
-        }
+        }?;
+        response.headers_mut().insert(
+            hyper::header::VARY,
+            hyper::header::HeaderValue::from_static("Accept, Content-Type"),
+        );
+        Ok(response)
     }
 
     async fn serve_post(&self, req: Request<Body>) -> Result<Response<Body>, http::Error> {

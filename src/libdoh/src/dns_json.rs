@@ -150,7 +150,7 @@ fn parse_name(packet: &[u8], mut offset: usize) -> Result<(String, usize), Error
                 jump_offset = offset + 2;
             }
             jumps += 1;
-            ensure!(jumps <= packet_len, "Compression pointer cycle");
+            ensure!(jumps <= 128, "Compression pointer cycle");
             offset = (((len & 0x3f) as usize) << 8) | (packet[offset + 1] as usize);
             jumped = true;
             continue;

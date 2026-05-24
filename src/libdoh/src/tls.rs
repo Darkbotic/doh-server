@@ -117,11 +117,20 @@ impl DoH {
                             continue;
                         }
                         let (raw_stream, client_addr) = tcp_cnx.unwrap();
-                        if let Ok(stream) = tls_acceptor.as_ref().unwrap().accept(raw_stream).await {
-                            let mut doh = self.clone();
-                            doh.remote_addr = Some(client_addr);
-                            doh.client_serve(stream, server.clone()).await
-                        }
+                        let tls_acceptor = tls_acceptor.as_ref().unwrap().clone();
+                        let mut doh = self.clone();
+                        let server = server.clone();
+                        self.globals.runtime_handle.clone().spawn(async move {
+                            if let Ok(Ok(stream)) = tokio::time::timeout(
+                                doh.globals.timeout + Duration::from_secs(1),
+                                tls_acceptor.accept(raw_stream),
+                            )
+                            .await
+                            {
+                                doh.remote_addr = Some(client_addr);
+                                doh.client_serve(stream, server).await
+                            }
+                        });
                     }
                     new_tls_acceptor = tls_acceptor_receiver.recv().fuse() => {
                         if new_tls_acceptor.is_none() {
