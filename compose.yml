@@ -1,0 +1,30 @@
+services:
+  doh-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: doh-server
+    restart: unless-stopped
+    network_mode: host
+    command:
+      - "--hostname=doh.example.com"
+      - "--listen-address=127.0.0.1:3000"
+      - "--server-address=127.0.0.1:53"
+      - "--path=/dns-query"
+      - "--max-clients=512"
+      - "--timeout=10"
+      # Uncomment to enable built-in TLS (provide cert files via volumes below):
+      # - "--tls-cert-path=/certs/cert.pem"
+      # - "--tls-cert-key-path=/certs/key.pem"
+    # volumes:
+    #   - ./certs:/certs:ro   # Mount TLS certificates if using built-in TLS
+    healthcheck:
+      test: ["CMD", "sh", "-c", "echo OK"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
